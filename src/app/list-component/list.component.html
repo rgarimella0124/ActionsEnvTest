@@ -1,0 +1,33 @@
+﻿<a routerLink="add" class="btn btn-sm btn-success mb-2">Add Employee</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 10%">Name</th>
+            <th style="width: 10%">Experience</th>
+            <th style="width: 10%">Salary</th>
+            <th style="width: 10%">Team</th>
+            <th style="width: 10%">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr *ngFor="let user of users">
+            <td>{{user.FirstName}} {{user.LastName}}</td>
+            <td>{{user.Experience}}</td>
+            <td>{{user.Salary}}</td>
+            <td>{{user.Team}}</td>
+            <td style="white-space: nowrap">
+                <a routerLink="edit/{{user.Id}}" class="btn btn-sm btn-primary mr-1">Edit</a>
+                <button (click)="deleteUser(user.Id)" class="btn btn-sm btn-danger btn-delete-user" [disabled]="user.isDeleting">
+                    <span *ngIf="user.isDeleting" class="spinner-border spinner-border-sm"></span>
+                    <span *ngIf="!user.isDeleting">Delete</span>
+                </button>
+            </td>
+        </tr>
+        <tr *ngIf="!users">
+            <td colspan="4" class="text-center">
+                <span class="spinner-border spinner-border-lg align-center"></span>
+            </td>
+        </tr>
+    </tbody>
+</table>
