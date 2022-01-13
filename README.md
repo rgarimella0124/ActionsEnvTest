@@ -1,3 +1,3 @@
 # angular-master-details-crud-example
 
-Angular - Master Details CRUD Example
+Angular App Environments Example
