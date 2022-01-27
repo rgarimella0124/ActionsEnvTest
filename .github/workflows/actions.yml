@@ -1,49 +1,61 @@
 name: "Run Common Functions For all three workflows"
-description: "Get Workflow Input"
 
-inputs:
-  AZURE_CREDENTIALS:
-    description: "Azure Service Princple for Logging With Azure CLI"
-    required: true
-  ACR_USERNAME:
-    description: "ACR Username to Login "
-    required: true
-  ACR_PASSWORD:
-    description: "The path to the workflow file used to retrieve default workflow input parameters."
-    required: true
-  Environment:
-    description: "Environement of the Current Direct Workflow"
-    required: true
+on:
+  workflow_call:
+    inputs:
+      AZURE_CREDENTIALS:
+        description: Platform to execute on
+        type: string
+        default: ubuntu-latest
 
-runs:
-  using: "composite"
-  steps:
-    - name: "Checkout Pull Request"
-      uses: actions/checkout@v2
-      with:
+      ACR_USERNAME:
+        description: Username of the ACR
+        type: string
+
+      project-folder:
+        description: The folder containing the project to build
+        type: string
+        default: .
+
+      ACR_PASSWORD:
+        description: Configuration to publish
+        type: string
+
+      Environment:
+        description: Name of the Environment
+        type: string
+
+jobs:
+  build:
+    name: Build dotnet app
+    runs-on: ${{ inputs.runs-on }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.project-folder }}
+
+    steps:
+      - name: "Checkout Pull Request"
+        uses: actions/checkout@v2
+        with:
         ref: ${{ github.event.pull_request.head.sha }}
-
-    - name: "Docker Acr Authentication and Image Building"
-      uses: azure/docker-login@v1
-      with:
-        login-server: mnitacr.azurecr.io
-        username: ${{ inputs.ACR_USERNAME }}
-        password: ${{ inputs.ACR_PASSWORD }}
-
-    - run: |
-        docker build . -t mnitacr.azurecr.io/angular:latest
-        docker push mnitacr.azurecr.io/angular:latest
-    - name: "Login via Azure CLI"
-      uses: azure/login@v1
-      with:
-        creds: ${{ inputs.AZURE_CREDENTIALS }}
-
-    - name: "Image Deployment to Azure Web App For Containers"
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: "AngularMnitPOC"
-        images: "mnitacr.azurecr.io/angular:latest"
-
-    - name: Azure logout
-      run: |
-        az logout
+      - name: "Docker Acr Authentication and Image Building"
+        uses: azure/docker-login@v1
+        with:
+          login-server: mnitacr.azurecr.io
+          username: ${{ inputs.ACR_USERNAME }}
+          password: ${{ inputs.ACR_PASSWORD }}
+      - run: |
+          docker build . -t mnitacr.azurecr.io/angular:latest
+          docker push mnitacr.azurecr.io/angular:latest
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ inputs.AZURE_CREDENTIALS }}
+      - name: "Image Deployment to Azure Web App For Containers"
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "AngularMnitPOC"
+          images: "mnitacr.azurecr.io/angular:latest"
+      - name: Azure logout
+        run: |
+          az logout
