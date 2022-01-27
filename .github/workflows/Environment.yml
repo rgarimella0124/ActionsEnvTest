@@ -25,103 +25,15 @@ jobs:
       name: Development
       url: "http://angularmnitpoc.azurewebsites.net"
     steps:
-      - name: "Checkout GitHub Action"
-        uses: actions/checkout@main
-
-      - name: "Docker Acr Authentication and Image Building"
-        uses: azure/docker-login@v1
+      - name: "Checkout Pull Request"
+        uses: actions/checkout@v2
         with:
-          login-server: mnitacr.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      - run: |
-          docker build . -t mnitacr.azurecr.io/angular:latest
-          docker push mnitacr.azurecr.io/angular:latest
-      - name: "Login via Azure CLI"
-        uses: azure/login@v1
+      - name: "Lot of Actions In Group"
+        uses: ./.github/workflows/actions.yml
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: "Image Deployment to Azure Web App For Containers"
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: "AngularMnitPOC"
-          images: "mnitacr.azurecr.io/angular:latest"
-
-      - name: Azure logout
-        run: |
-          az logout
-
-  DeployStaging:
-    name: Deploy to Staging
-    if: github.event.ref == 'refs/heads/main'
-    needs: [Build]
-    runs-on: ubuntu-latest
-    environment:
-      name: Staging
-      url: "http://angularmnitpoc.azurewebsites.net"
-    steps:
-      - name: "Checkout GitHub Action"
-        uses: actions/checkout@main
-
-      - name: "Docker Acr Authentication and Image Building"
-        uses: azure/docker-login@v1
-        with:
-          login-server: mnitacr.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
-
-      - run: |
-          docker build . -t mnitacr.azurecr.io/angular:latest
-          docker push mnitacr.azurecr.io/angular:latest
-      - name: "Login via Azure CLI"
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: "Image Deployment to Azure Web App For Containers"
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: "AngularMnitPOC"
-          images: "mnitacr.azurecr.io/angular:latest"
-
-      - name: Azure logout
-        run: |
-          az logout
-
-  DeployProd:
-    name: Deploy to Production
-    needs: [DeployStaging]
-    runs-on: ubuntu-latest
-    environment:
-      name: Production
-      url: "http://angularmnitpoc.azurewebsites.net"
-    steps:
-      - name: "Checkout GitHub Action"
-        uses: actions/checkout@main
-
-      - name: "Docker Acr Authentication and Image Building"
-        uses: azure/docker-login@v1
-        with:
-          login-server: mnitacr.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
-
-      - run: |
-          docker build . -t mnitacr.azurecr.io/angular:latest
-          docker push mnitacr.azurecr.io/angular:latest
-      - name: "Login via Azure CLI"
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: "Image Deployment to Azure Web App For Containers"
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: "AngularMnitPOC"
-          images: "mnitacr.azurecr.io/angular:latest"
-
-      - name: Azure logout
-        run: |
-          az logout
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          Environment: "Development"
