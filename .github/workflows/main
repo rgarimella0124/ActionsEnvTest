@@ -1,0 +1,25 @@
+name: CI + CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  DeployDev:
+    name: Deploy to Dev
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: Development
+      url: "http://angularmnitpoc.azurewebsites.net"
+    steps:
+      - name: "Lot of Actions In Group"
+        uses: rgarimella0124/ActionsEnvTest/.github/actions/action.yml@main
+        with:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+          Environment: "Development"
