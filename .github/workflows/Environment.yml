@@ -8,14 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Compile
-        run: echo Hello, world!
-
   DeployDev:
     name: Deploy to Dev
     if: github.event_name == 'pull_request'
@@ -25,11 +17,6 @@ jobs:
       name: Development
       url: "http://angularmnitpoc.azurewebsites.net"
     steps:
-      - name: "Checkout Pull Request"
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
       - name: "Lot of Actions In Group"
         uses: ./.github/workflows/actions.yml
         with:
