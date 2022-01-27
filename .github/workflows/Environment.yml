@@ -8,18 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Compile
-        run: echo Hello, world!
-
   DeployDev:
     name: Deploy to Dev
     if: github.event_name == 'pull_request'
-    needs: [Build]
     runs-on: ubuntu-latest
     environment:
       name: Development
