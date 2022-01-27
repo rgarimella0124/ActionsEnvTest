@@ -1,27 +1,44 @@
-- name: "Checkout GitHub Action"
-  uses: actions/checkout@main
+name: "Run Common Functions For all three workflows"
+description: "Get Workflow Input"
 
-- name: "Docker Acr Authentication and Image Building"
-  uses: azure/docker-login@v1
-  with:
-    login-server: mnitacr.azurecr.io
-    username: ${{ secrets.ACR_USERNAME }}
-    password: ${{ secrets.ACR_PASSWORD }}
+inputs:
+  AZURE_CREDENTIALS:
+    description: "Azure Service Princple for Logging With Azure CLI"
+    required: true
+  ACR_USERNAME:
+    description: "ACR Username to Login "
+    required: true
+  ACR_PASSWORD:
+    description: "The path to the workflow file used to retrieve default workflow input parameters."
+    required: true
+  Environment:
+    description: "Environement of the Current Direct Workflow"
+    required: true
 
-- run: |
-    docker build . -t mnitacr.azurecr.io/angular:latest
-    docker push mnitacr.azurecr.io/angular:latest
-- name: "Login via Azure CLI"
-  uses: azure/login@v1
-  with:
-    creds: ${{ secrets.AZURE_CREDENTIALS }}
+runs:
+  using: "composite"
+  steps:
+    - name: "Docker Acr Authentication and Image Building"
+      uses: azure/docker-login@v1
+      with:
+        login-server: mnitacr.azurecr.io
+        username: ${{ inputs.ACR_USERNAME }}
+        password: ${{ inputs.ACR_PASSWORD }}
 
-- name: "Image Deployment to Azure Web App For Containers"
-  uses: azure/webapps-deploy@v2
-  with:
-    app-name: "AngularMnitPOC"
-    images: "mnitacr.azurecr.io/angular:latest"
+    - run: |
+        docker build . -t mnitacr.azurecr.io/angular:latest
+        docker push mnitacr.azurecr.io/angular:latest
+    - name: "Login via Azure CLI"
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.AZURE_CREDENTIALS }}
 
-- name: Azure logout
-  run: |
-    az logout
+    - name: "Image Deployment to Azure Web App For Containers"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: "AngularMnitPOC"
+        images: "mnitacr.azurecr.io/angular:latest"
+
+    - name: Azure logout
+      run: |
+        az logout
